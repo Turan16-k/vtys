@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import durum_rozeti %}
+{% block baslik %}Ana Sayfa{% endblock %}
+{% block icerik %}
+<h1>Kontrol Paneli</h1>
+<p class="alt-baslik">Turnuvalar, takımlar ve oyuncular için genel durum.</p>
+
+<div class="kartlar">
+    <div class="kart"><div class="etiket">Oyuncu</div><div class="deger">{{ sayilar.oyuncu }}</div></div>
+    <div class="kart"><div class="etiket">Takım</div><div class="deger">{{ sayilar.takim }}</div></div>
+    <div class="kart"><div class="etiket">Turnuva</div><div class="deger">{{ sayilar.turnuva }}</div></div>
+    <div class="kart"><div class="etiket">Oynanan Maç</div><div class="deger">{{ sayilar.mac }}</div></div>
+    <div class="kart"><div class="etiket">Toplam Ödül Havuzu</div><div class="deger">{{ sayilar.odul|para }}</div></div>
+</div>
+
+<div class="izgara izgara-2">
+    <section class="panel">
+        <h2>Aktif Turnuvalar</h2>
+        <table>
+            <thead><tr><th>Turnuva</th><th>Oyun</th><th>Durum</th><th class="sayi">Ödül</th></tr></thead>
+            <tbody>
+            {% for t in devam_eden %}
+                <tr>
+                    <td><a href="{{ url_for('turnuva_detay', turnuva_id=t.turnuva_id) }}">{{ t.turnuva_adi }}</a></td>
+                    <td>{{ t.oyun_adi }}</td>
+                    <td>{{ durum_rozeti(t.durum) }}</td>
+                    <td class="sayi">{{ t.odul_havuzu|para }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="4" class="bos">Aktif turnuva yok.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>En Yüksek ELO Puanlı Oyuncular</h2>
+        <table>
+            <thead><tr><th>#</th><th>Oyuncu</th><th>Takım</th><th class="sayi">ELO</th></tr></thead>
+            <tbody>
+            {% for o in en_iyiler %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><a href="{{ url_for('oyuncu_detay', oyuncu_id=o.oyuncu_id) }}">{{ o.takma_ad }}</a>
+                        <span class="soluk">· {{ o.ad_soyad }}</span></td>
+                    <td>{{ o.takim_adi or '-' }}</td>
+                    <td class="sayi">{{ o.elo_puani }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Son Maç Sonuçları</h2>
+        <table>
+            <tbody>
+            {% for m in son_maclar %}
+                <tr>
+                    <td class="soluk">{{ m.mac_zamani|tarih }}</td>
+                    <td class="{{ 'kazanan' if m.kazanan_id == m.takim1_id }}">{{ m.t1 }}</td>
+                    <td><a href="{{ url_for('mac_detay', mac_id=m.mac_id) }}">{{ m.takim1_skor }} - {{ m.takim2_skor }}</a></td>
+                    <td class="{{ 'kazanan' if m.kazanan_id == m.takim2_id }}">{{ m.t2 }}</td>
+                    <td class="soluk">{{ m.turnuva_adi }}</td>
+                </tr>
+            {% else %}
+                <tr><td class="bos">Henüz oynanmış maç yok.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Yaklaşan Maçlar</h2>
+        <table>
+            <tbody>
+            {% for m in yaklasan %}
+                <tr>
+                    <td class="soluk">{{ m.mac_zamani|tarih }}</td>
+                    <td><a href="{{ url_for('mac_detay', mac_id=m.mac_id) }}">{{ m.t1 }} vs {{ m.t2 }}</a></td>
+                    <td class="soluk">{{ m.turnuva_adi }}</td>
+                </tr>
+            {% else %}
+                <tr><td class="bos">Planlanmış maç yok.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

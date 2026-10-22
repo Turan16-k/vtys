@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import sil_butonu %}
+{% block baslik %}Oyuncular{% endblock %}
+{% block icerik %}
+<div class="baslik-satiri">
+    <div>
+        <h1>Oyuncular</h1>
+        <p class="alt-baslik">Arama <code>oyuncu_ara()</code> fonksiyonu ile yapılır.</p>
+    </div>
+    <a class="btn" href="{{ url_for('oyuncu_ekle') }}">+ Yeni Oyuncu</a>
+</div>
+
+<section class="panel">
+    <form class="arama" method="get">
+        <input type="text" name="q" value="{{ aranan }}" placeholder="Takma ad, ad, soyad veya takım adı ile ara...">
+        <button class="btn" type="submit">Ara</button>
+        {% if aranan %}<a class="btn btn-ikincil" href="{{ url_for('oyuncular') }}">Temizle</a>{% endif %}
+    </form>
+
+    <p class="soluk">{{ kayitlar|length }} oyuncu bulundu{% if aranan %} (aranan: "{{ aranan }}"){% endif %}.</p>
+
+    <div class="tablo-kap">
+    <table>
+        <thead>
+        <tr><th>Takma Ad</th><th>Ad Soyad</th><th>Ülke</th><th class="sayi">Yaş</th><th>Takım</th>
+            <th>Oyun</th><th class="sayi">ELO</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for o in kayitlar %}
+            <tr>
+                <td><a href="{{ url_for('oyuncu_detay', oyuncu_id=o.oyuncu_id) }}"><strong>{{ o.takma_ad }}</strong></a></td>
+                <td>{{ o.ad_soyad }}</td>
+                <td>{{ o.ulke_adi }}</td>
+                <td class="sayi">{{ o.yas }}</td>
+                <td>{{ o.takim_adi or '' }}{% if not o.takim_adi %}<span class="rozet gri">Serbest</span>{% endif %}</td>
+                <td>{{ o.oyun_adi or '-' }}</td>
+                <td class="sayi">{{ o.elo_puani }}</td>
+                <td style="white-space:nowrap">
+                    <a class="btn btn-ikincil btn-kucuk" href="{{ url_for('oyuncu_duzenle', oyuncu_id=o.oyuncu_id) }}">Düzenle</a>
+                    {{ sil_butonu(url_for('oyuncu_sil', oyuncu_id=o.oyuncu_id), o.takma_ad ~ ' silinsin mi?') }}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8" class="bos">Aramaya uygun oyuncu bulunamadı.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}

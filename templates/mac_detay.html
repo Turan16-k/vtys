@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import sil_butonu, durum_rozeti %}
+{% block baslik %}Maç #{{ mac.mac_id }}{% endblock %}
+{% block icerik %}
+<p><a href="{{ url_for('turnuva_detay', turnuva_id=mac.turnuva_id) }}">← {{ mac.turnuva_adi }}</a></p>
+
+<section class="panel" style="text-align:center">
+    <p class="soluk">{{ mac.asama_adi }} · {{ mac.mac_zamani|tarih }} · Hakem: {{ mac.hakem or '-' }} · {{ durum_rozeti(mac.durum) }}</p>
+    <div style="display:flex; justify-content:center; align-items:center; gap:30px; font-size:26px; font-weight:800; flex-wrap:wrap">
+        <a class="{{ 'kazanan' if mac.kazanan_id == mac.takim1_id }}" href="{{ url_for('takim_detay', takim_id=mac.takim1_id) }}">{{ mac.t1_adi }}</a>
+        <span style="font-size:40px">{{ mac.takim1_skor if mac.takim1_skor is not none else '-' }} : {{ mac.takim2_skor if mac.takim2_skor is not none else '-' }}</span>
+        <a class="{{ 'kazanan' if mac.kazanan_id == mac.takim2_id }}" href="{{ url_for('takim_detay', takim_id=mac.takim2_id) }}">{{ mac.t2_adi }}</a>
+    </div>
+    {% if mac.durum == 'Planlandı' %}
+        <form method="post" action="{{ url_for('mac_sonuc', mac_id=mac.mac_id) }}" style="margin-top:16px">
+            <input class="skor-input" type="number" name="skor1" min="0" max="99" required>
+            <input class="skor-input" type="number" name="skor2" min="0" max="99" required>
+            <button class="btn" type="submit">Sonucu Kaydet</button>
+        </form>
+        <p class="soluk">Sonuç <code>mac_sonucu_gir</code> saklı yordamı ile girilir.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Oyuncu İstatistikleri</h2>
+    <table>
+        <thead><tr><th>Takım</th><th>Oyuncu</th><th class="sayi">Öldürme</th><th class="sayi">Ölüm</th><th class="sayi">Asist</th><th class="sayi">KDA</th><th></th><th></th></tr></thead>
+        <tbody>
+        {% for s in istatistikler %}
+            <tr>
+                <td><span class="rozet mor">{{ s.kisa_ad }}</span></td>
+                <td><a href="{{ url_for('oyuncu_detay', oyuncu_id=s.oyuncu_id) }}">{{ s.takma_ad }}</a></td>
+                <td class="sayi">{{ s.oldurme }}</td>
+                <td class="sayi">{{ s.olum }}</td>
+                <td class="sayi">{{ s.asist }}</td>
+                <td class="sayi">{{ s.kda }}</td>
+                <td>{% if s.mvp %}<span class="rozet sari">MVP</span>{% endif %}</td>
+                <td>{{ sil_butonu(url_for('istatistik_sil', mac_id=mac.mac_id, istatistik_id=s.istatistik_id), 'İstatistik silinsin mi?') }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8" class="bos">İstatistik girilmemiş.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if mac.durum == 'Oynandı' and oyuncular %}
+        <h2 style="margin-top:20px">İstatistik Ekle</h2>
+        <form class="kucuk-form" method="post" action="{{ url_for('istatistik_ekle', mac_id=mac.mac_id) }}">
+            <div>
+                <label>Oyuncu</label>
+                <select name="oyuncu_id" required>
+                    {% for o in oyuncular %}<option value="{{ o.kisi_id }}">{{ o.kisa_ad }} · {{ o.takma_ad }}</option>{% endfor %}
+                </select>
+            </div>
+            <div><label>Öldürme</label><input type="number" name="oldurme" min="0" value="0" required></div>
+            <div><label>Ölüm</label><input type="number" name="olum" min="0" value="0" required></div>
+            <div><label>Asist</label><input type="number" name="asist" min="0" value="0" required></div>
+            <div style="flex:0"><label>MVP</label><input type="checkbox" name="mvp"></div>
+            <button class="btn" type="submit">Ekle</button>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}

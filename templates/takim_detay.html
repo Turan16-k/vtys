@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import sil_butonu, durum_rozeti %}
+{% block baslik %}{{ takim.takim_adi }}{% endblock %}
+{% block icerik %}
+<div class="baslik-satiri">
+    <div>
+        <h1>{{ takim.takim_adi }} <span class="rozet mor">{{ takim.kisa_ad }}</span></h1>
+        <p class="alt-baslik">{{ takim.oyun_adi }} · {{ takim.ulke_adi }} · Kuruluş: {{ takim.kurulus_tarihi|tarih }}
+            · Koç: {{ takim.koc or 'yok' }}{% if takim.koc %} ({{ takim.deneyim_yili }} yıl deneyim){% endif %}</p>
+    </div>
+    <div>
+        <a class="btn btn-ikincil" href="{{ url_for('takim_duzenle', takim_id=takim.takim_id) }}">Düzenle</a>
+        {{ sil_butonu(url_for('takim_sil', takim_id=takim.takim_id), takim.takim_adi ~ ' silinsin mi?', 'Takımı Sil') }}
+    </div>
+</div>
+
+<section class="panel">
+    <div class="baslik-satiri" style="margin-bottom:8px">
+        <h2>Kadro</h2>
+        <span class="soluk">Sahada {{ takim.takim_boyutu }} oyuncu · en fazla {{ takim.takim_boyutu + 2 }} aktif oyuncu</span>
+    </div>
+    <table>
+        <thead><tr><th>Oyuncu</th><th>Ad Soyad</th><th>Rol</th><th class="sayi">ELO</th><th>Katılma</th><th>Ayrılma</th><th></th></tr></thead>
+        <tbody>
+        {% for k in kadro %}
+            <tr class="{{ 'soluk' if k.ayrilma_tarihi }}">
+                <td><a href="{{ url_for('oyuncu_detay', oyuncu_id=k.oyuncu_id) }}">{{ k.takma_ad }}</a></td>
+                <td>{{ k.ad_soyad }}</td>
+                <td>{{ k.rol }} {% if k.kaptan %}<span class="rozet sari">Kaptan</span>{% endif %}</td>
+                <td class="sayi">{{ k.elo_puani }}</td>
+                <td>{{ k.katilma_tarihi|tarih }}</td>
+                <td>{{ k.ayrilma_tarihi|tarih }}</td>
+                <td style="white-space:nowrap">
+                    {% if not k.ayrilma_tarihi %}
+                        {% if not k.kaptan %}
+                        <form class="satir-ici" method="post" action="{{ url_for('kaptan_yap', takim_id=takim.takim_id, kadro_id=k.kadro_id) }}">
+                            <button class="btn btn-ikincil btn-kucuk">Kaptan Yap</button>
+                        </form>
+                        {% endif %}
+                        <form class="satir-ici" method="post" action="{{ url_for('oyuncu_transfer', oyuncu_id=k.oyuncu_id) }}"
+                              onsubmit='return confirm({{ (k.takma_ad ~ " kadrodan çıkarılsın mı?")|tojson }});'>
+                            <input type="hidden" name="takim_id" value="">
+                            <input type="hidden" name="donus" value="{{ url_for('takim_detay', takim_id=takim.takim_id) }}">
+                            <button class="btn btn-tehlike btn-kucuk">Kadrodan Çıkar</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="bos">Kadroda oyuncu yok.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2 style="margin-top:20px">Kadroya Oyuncu Ekle</h2>
+    <form class="kucuk-form" method="post" action="{{ url_for('kadro_ekle', takim_id=takim.takim_id) }}">
+        <div>
+            <label>Serbest Oyuncu</label>
+            <select name="oyuncu_id" required>
+                <option value="">— Seçin —</option>
+                {% for o in serbest_oyuncular %}
+                    <option value="{{ o.kisi_id }}">{{ o.takma_ad }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div><label>Rol</label><input name="rol" placeholder="Oyuncu"></div>
+        <button class="btn" type="submit">Ekle</button>
+    </form>
+</section>
+
+<div class="izgara izgara-2">
+    <section class="panel">
+        <h2>Turnuvalar</h2>
+        <table>
+            <thead><tr><th>Turnuva</th><th>Durum</th><th class="sayi">G-M</th><th class="sayi">Puan</th><th class="sayi">Sıra</th><th class="sayi">Ödül</th></tr></thead>
+            <tbody>
+            {% for t in turnuvalar %}
+                <tr>
+                    <td><a href="{{ url_for('turnuva_detay', turnuva_id=t.turnuva_id) }}">{{ t.turnuva_adi }}</a></td>
+                    <td>{{ durum_rozeti(t.durum) }}</td>
+                    <td class="sayi">{{ t.galibiyet }}-{{ t.maglubiyet }}</td>
+                    <td class="sayi">{{ t.puan }}</td>
+                    <td class="sayi">{{ t.sira or '-' }}</td>
+                    <td class="sayi">{{ t.odul|para }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="bos">Turnuva kaydı yok.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Sponsorlar</h2>
+        <table>
+            <thead><tr><th>Sponsor</th><th>Sektör</th><th>Süre</th><th class="sayi">Yıllık</th></tr></thead>
+            <tbody>
+            {% for s in sponsorlar %}
+                <tr>
+                    <td>{{ s.sponsor_adi }}</td>
+                    <td>{{ s.sektor }}</td>
+                    <td>{{ s.baslangic|tarih }} – {{ s.bitis|tarih }}</td>
+                    <td class="sayi">{{ s.yillik_tutar|para }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="4" class="bos">Sponsor yok.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

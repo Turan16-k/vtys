@@ -1,0 +1,144 @@
+:root {
+    --bg: #0d1020;
+    --panel: #161a2e;
+    --panel-2: #1d2240;
+    --border: #2a3058;
+    --text: #e7e9f5;
+    --muted: #9aa0c3;
+    --accent: #7c5cff;
+    --accent-2: #22d3ee;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Üst menü ---------- */
+.ust-menu {
+    background: linear-gradient(90deg, #1a1440, #0f1a3a);
+    border-bottom: 1px solid var(--border);
+}
+.ust-menu .kap {
+    display: flex; align-items: center; gap: 28px;
+    max-width: 1200px; margin: 0 auto; padding: 14px 20px;
+}
+.logo { font-weight: 800; font-size: 20px; color: #fff; letter-spacing: .5px; }
+.logo span { color: var(--accent-2); }
+.ust-menu nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.ust-menu nav a {
+    color: var(--muted); padding: 7px 14px; border-radius: 8px; font-weight: 600;
+}
+.ust-menu nav a:hover, .ust-menu nav a.aktif {
+    color: #fff; background: rgba(124, 92, 255, .22); text-decoration: none;
+}
+
+main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+
+h1 { font-size: 26px; margin: 0 0 4px; }
+h2 { font-size: 18px; margin: 0 0 14px; }
+.alt-baslik { color: var(--muted); margin: 0 0 20px; }
+
+.baslik-satiri {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 18px;
+}
+
+/* ---------- Paneller ---------- */
+.panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px;
+}
+.izgara { display: grid; gap: 20px; }
+.izgara-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.izgara-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 860px) { .izgara-2, .izgara-3 { grid-template-columns: 1fr; } }
+
+.kartlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 22px; }
+.kart {
+    background: linear-gradient(145deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px;
+}
+.kart .deger { font-size: 28px; font-weight: 800; color: #fff; }
+.kart .etiket { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .6px; }
+
+/* ---------- Tablolar ---------- */
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; }
+tbody tr:hover { background: rgba(255, 255, 255, .03); }
+td.sayi, th.sayi { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tablo-kap { overflow-x: auto; }
+.bos { color: var(--muted); text-align: center; padding: 22px; }
+
+/* ---------- Formlar ---------- */
+form.satir-ici { display: inline; }
+.arama { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.arama input[type=text] { flex: 1; min-width: 220px; }
+
+label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+input, select, textarea {
+    width: 100%; background: #0f1328; color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; font: inherit;
+}
+input:focus, select:focus { outline: 2px solid var(--accent); border-color: transparent; }
+input[type=checkbox] { width: auto; }
+.form-izgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+.form-izgara .tam { grid-column: 1 / -1; }
+@media (max-width: 700px) { .form-izgara { grid-template-columns: 1fr; } }
+.form-alt { display: flex; gap: 10px; margin-top: 20px; }
+fieldset { border: 1px dashed var(--border); border-radius: var(--radius); padding: 14px 16px; margin: 0; }
+legend { color: var(--accent-2); font-weight: 700; padding: 0 6px; }
+.kucuk-form { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.kucuk-form > div { flex: 1; min-width: 120px; }
+.skor-input { width: 58px; padding: 6px; text-align: center; }
+
+/* ---------- Butonlar ---------- */
+.btn {
+    display: inline-block; border: 0; border-radius: 8px; padding: 9px 16px;
+    font: inherit; font-weight: 700; cursor: pointer; color: #fff;
+    background: var(--accent); white-space: nowrap;
+}
+.btn:hover { filter: brightness(1.12); text-decoration: none; }
+.btn-ikincil { background: #2b3160; }
+.btn-tehlike { background: var(--danger); }
+.btn-basari { background: #16a34a; }
+.btn-kucuk { padding: 5px 10px; font-size: 13px; }
+
+/* ---------- Rozetler ---------- */
+.rozet {
+    display: inline-block; padding: 2px 9px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; background: #2b3160; color: var(--text);
+    white-space: nowrap;
+}
+.rozet.yesil { background: rgba(34, 197, 94, .18); color: #4ade80; }
+.rozet.mavi { background: rgba(34, 211, 238, .16); color: var(--accent-2); }
+.rozet.mor { background: rgba(124, 92, 255, .22); color: #b9a8ff; }
+.rozet.gri { background: rgba(154, 160, 195, .16); color: var(--muted); }
+.rozet.sari { background: rgba(245, 158, 11, .18); color: #fbbf24; }
+.kazanan { color: #4ade80; font-weight: 800; }
+.soluk { color: var(--muted); }
+
+/* ---------- Bildirimler ---------- */
+.bildirim { padding: 12px 16px; border-radius: var(--radius); margin-bottom: 16px; font-weight: 600; }
+.bildirim.basari { background: rgba(34, 197, 94, .14); border: 1px solid rgba(34, 197, 94, .5); color: #86efac; }
+.bildirim.hata { background: rgba(239, 68, 68, .14); border: 1px solid rgba(239, 68, 68, .55); color: #fca5a5; }
+
+.bilgi-listesi { display: grid; grid-template-columns: max-content 1fr; gap: 7px 18px; margin: 0; }
+.bilgi-listesi dt { color: var(--muted); }
+.bilgi-listesi dd { margin: 0; font-weight: 600; }
+
+footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px; border-top: 1px solid var(--border); }

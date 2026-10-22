@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block baslik %}İşlem Günlüğü{% endblock %}
+{% block icerik %}
+<h1>İşlem Günlüğü</h1>
+<p class="alt-baslik">kisi, takim ve turnuva tablolarındaki değişiklikler <code>trg_islem_log</code> tetikleyicisi ile otomatik kaydedilir (son 100 kayıt).</p>
+
+<section class="panel">
+    <form class="arama" method="get">
+        <select name="tablo" style="max-width:220px">
+            <option value="">Tüm tablolar</option>
+            {% for t in ['kisi', 'takim', 'turnuva'] %}
+                <option {{ 'selected' if secili_tablo == t }}>{{ t }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn" type="submit">Filtrele</button>
+    </form>
+    <div class="tablo-kap">
+    <table>
+        <thead><tr><th>#</th><th>Zaman</th><th>Tablo</th><th>İşlem</th><th>Kullanıcı</th><th>Kayıt</th></tr></thead>
+        <tbody>
+        {% for k in kayitlar %}
+            <tr>
+                <td>{{ k.log_id }}</td>
+                <td style="white-space:nowrap">{{ k.islem_zamani|tarih }}</td>
+                <td>{{ k.tablo_adi }}</td>
+                <td><span class="rozet {{ {'INSERT': 'yesil', 'UPDATE': 'sari', 'DELETE': 'gri'}[k.islem_turu] }}">{{ k.islem_turu }}</span></td>
+                <td>{{ k.kullanici }}</td>
+                <td><code style="font-size:12px; word-break:break-all">{{ k.kayit_bilgisi[:160] }}{% if k.kayit_bilgisi|length > 160 %}…{% endif %}</code></td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="bos">Kayıt yok.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}

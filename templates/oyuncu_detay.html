@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import sil_butonu %}
+{% block baslik %}{{ oyuncu.takma_ad }}{% endblock %}
+{% block icerik %}
+<div class="baslik-satiri">
+    <div>
+        <h1>{{ oyuncu.takma_ad }}</h1>
+        <p class="alt-baslik">{{ oyuncu.ad }} {{ oyuncu.soyad }} · {{ oyuncu.ulke_adi }} · {{ oyuncu.yas }} yaşında</p>
+    </div>
+    <div>
+        <a class="btn btn-ikincil" href="{{ url_for('oyuncu_duzenle', oyuncu_id=oyuncu.kisi_id) }}">Düzenle</a>
+        {{ sil_butonu(url_for('oyuncu_sil', oyuncu_id=oyuncu.kisi_id), oyuncu.takma_ad ~ ' silinsin mi? İstatistikleri ve kadro geçmişi de silinir.', 'Oyuncuyu Sil') }}
+    </div>
+</div>
+
+<div class="kartlar">
+    <div class="kart"><div class="etiket">ELO</div><div class="deger">{{ oyuncu.elo_puani }}</div></div>
+    <div class="kart"><div class="etiket">Maç</div><div class="deger">{{ istatistik.mac_sayisi }}</div></div>
+    <div class="kart"><div class="etiket">Ö / Ö / A</div><div class="deger">{{ istatistik.toplam_oldurme }} / {{ istatistik.toplam_olum }} / {{ istatistik.toplam_asist }}</div></div>
+    <div class="kart"><div class="etiket">KDA</div><div class="deger">{{ istatistik.kda }}</div></div>
+    <div class="kart"><div class="etiket">MVP</div><div class="deger">{{ istatistik.mvp_sayisi }}</div></div>
+</div>
+<p class="soluk" style="margin-top:-10px">İstatistikler <code>oyuncu_istatistik()</code> fonksiyonu ile hesaplanır.</p>
+
+<div class="izgara izgara-2">
+    <section class="panel">
+        <h2>Kişisel Bilgiler</h2>
+        <dl class="bilgi-listesi">
+            <dt>E-posta</dt><dd>{{ oyuncu.eposta }}</dd>
+            <dt>Doğum Tarihi</dt><dd>{{ oyuncu.dogum_tarihi|tarih }}</dd>
+            <dt>Kayıt Tarihi</dt><dd>{{ oyuncu.kayit_tarihi|tarih }}</dd>
+        </dl>
+    </section>
+
+    <section class="panel">
+        <h2>Transfer</h2>
+        <p class="soluk">Transfer <code>oyuncu_transfer</code> saklı yordamı ile yapılır; eski kadro kaydı kapatılır.</p>
+        <form class="kucuk-form" method="post" action="{{ url_for('oyuncu_transfer', oyuncu_id=oyuncu.kisi_id) }}">
+            <div>
+                <label>Yeni Takım</label>
+                <select name="takim_id">
+                    <option value="">— Serbest bırak —</option>
+                    {% for t in takimlar %}<option value="{{ t.takim_id }}">{{ t.takim_adi }} ({{ t.oyun_adi }})</option>{% endfor %}
+                </select>
+            </div>
+            <div><label>Rol</label><input name="rol" placeholder="Oyuncu"></div>
+            <button class="btn" type="submit">Uygula</button>
+        </form>
+    </section>
+</div>
+
+<section class="panel">
+    <h2>Kadro Geçmişi</h2>
+    <table>
+        <thead><tr><th>Takım</th><th>Rol</th><th>Katılma</th><th>Ayrılma</th><th></th></tr></thead>
+        <tbody>
+        {% for k in kadro %}
+            <tr>
+                <td><a href="{{ url_for('takim_detay', takim_id=k.takim_id) }}">{{ k.takim_adi }}</a></td>
+                <td>{{ k.rol }} {% if k.kaptan %}<span class="rozet sari">Kaptan</span>{% endif %}</td>
+                <td>{{ k.katilma_tarihi|tarih }}</td>
+                <td>{{ k.ayrilma_tarihi|tarih }}</td>
+                <td>{% if not k.ayrilma_tarihi %}<span class="rozet yesil">Aktif</span>{% endif %}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="bos">Oyuncu hiçbir takımda oynamadı.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section class="panel">
+    <h2>Maç İstatistikleri</h2>
+    <table>
+        <thead><tr><th>Tarih</th><th>Maç</th><th>Turnuva</th><th class="sayi">Öldürme</th><th class="sayi">Ölüm</th><th class="sayi">Asist</th><th></th></tr></thead>
+        <tbody>
+        {% for m in maclar %}
+            <tr>
+                <td>{{ m.mac_zamani|tarih }}</td>
+                <td><a href="{{ url_for('mac_detay', mac_id=m.mac_id) }}">{{ m.t1 }} {{ m.takim1_skor }} - {{ m.takim2_skor }} {{ m.t2 }}</a>
+                    {% if m.kazanan_id == m.takim_id %}<span class="rozet yesil">G</span>{% else %}<span class="rozet gri">M</span>{% endif %}</td>
+                <td>{{ m.turnuva_adi }}</td>
+                <td class="sayi">{{ m.oldurme }}</td>
+                <td class="sayi">{{ m.olum }}</td>
+                <td class="sayi">{{ m.asist }}</td>
+                <td>{% if m.mvp %}<span class="rozet sari">MVP</span>{% endif %}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="bos">İstatistik kaydı yok.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

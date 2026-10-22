@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block baslik %}{{ 'Yeni Takım' if yeni else 'Takım Düzenle' }}{% endblock %}
+{% block icerik %}
+<h1>{{ 'Yeni Takım Ekle' if yeni else 'Takım Bilgilerini Güncelle' }}</h1>
+<p class="alt-baslik">Bir koç yalnızca bir takımı çalıştırabilir; listede yalnızca boştaki koçlar görünür.</p>
+
+<form class="panel" method="post">
+    <div class="form-izgara">
+        <div><label>Takım Adı</label><input name="takim_adi" required maxlength="60" value="{{ deger.get('takim_adi', '') }}"></div>
+        <div><label>Kısa Ad (en fazla 5 karakter)</label><input name="kisa_ad" required maxlength="5" value="{{ deger.get('kisa_ad', '') }}"></div>
+        <div>
+            <label>Oyun</label>
+            <select name="oyun_id" required>
+                {% for o in oyunlar %}
+                    <option value="{{ o.oyun_id }}" {{ 'selected' if deger.get('oyun_id')|string == o.oyun_id|string }}>{{ o.oyun_adi }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Ülke</label>
+            <select name="ulke_id" required>
+                {% for u in ulkeler %}
+                    <option value="{{ u.ulke_id }}" {{ 'selected' if deger.get('ulke_id')|string == u.ulke_id|string }}>{{ u.ulke_adi }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Koç</label>
+            <select name="koc_id">
+                <option value="">— Koç yok —</option>
+                {% for k in koclar %}
+                    <option value="{{ k.kisi_id }}" {{ 'selected' if deger.get('koc_id')|string == k.kisi_id|string }}>{{ k.ad }} ({{ k.deneyim_yili }} yıl)</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div><label>Kuruluş Tarihi</label><input name="kurulus_tarihi" type="date" required value="{{ deger.get('kurulus_tarihi', bugun.isoformat()) }}"></div>
+    </div>
+    <div class="form-alt">
+        <button class="btn" type="submit">{{ 'Ekle' if yeni else 'Güncelle' }}</button>
+        <a class="btn btn-ikincil" href="{{ url_for('takimlar') if yeni else url_for('takim_detay', takim_id=takim_id) }}">Vazgeç</a>
+    </div>
+</form>
+{% endblock %}

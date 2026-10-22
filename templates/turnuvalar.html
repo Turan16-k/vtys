@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import sil_butonu, durum_rozeti, tur_rozeti %}
+{% block baslik %}Turnuvalar{% endblock %}
+{% block icerik %}
+<div class="baslik-satiri">
+    <div>
+        <h1>Turnuvalar</h1>
+        <p class="alt-baslik">Online ve salon turnuvaları (kalıtım: turnuva → online_turnuva / salon_turnuva).</p>
+    </div>
+    <a class="btn" href="{{ url_for('turnuva_ekle') }}">+ Yeni Turnuva</a>
+</div>
+
+<section class="panel">
+    <form class="arama" method="get">
+        <input type="text" name="q" value="{{ aranan }}" placeholder="Turnuva adı ile ara...">
+        <select name="durum" style="max-width:200px">
+            <option value="">Tüm durumlar</option>
+            {% for d in ['Kayıt Açık', 'Devam Ediyor', 'Tamamlandı'] %}
+                <option {{ 'selected' if secili_durum == d }}>{{ d }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn" type="submit">Ara</button>
+        {% if aranan or secili_durum %}<a class="btn btn-ikincil" href="{{ url_for('turnuvalar') }}">Temizle</a>{% endif %}
+    </form>
+
+    <div class="tablo-kap">
+    <table>
+        <thead><tr><th>Turnuva</th><th>Oyun</th><th>Tür</th><th>Yer / Platform</th><th>Tarih</th>
+            <th class="sayi">Takım</th><th class="sayi">Ödül Havuzu</th><th>Durum</th><th></th></tr></thead>
+        <tbody>
+        {% for t in kayitlar %}
+            <tr>
+                <td><a href="{{ url_for('turnuva_detay', turnuva_id=t.turnuva_id) }}"><strong>{{ t.turnuva_adi }}</strong></a></td>
+                <td>{{ t.oyun_adi }}</td>
+                <td>{{ tur_rozeti(t.turnuva_turu) }}</td>
+                <td>{% if t.turnuva_turu == 'O' %}{{ t.yayin_platformu }} · {{ t.sunucu_bolgesi }}{% else %}{{ t.mekan_adi }}, {{ t.sehir }}{% endif %}</td>
+                <td style="white-space:nowrap">{{ t.baslangic_tarihi|tarih }} – {{ t.bitis_tarihi|tarih }}</td>
+                <td class="sayi">{{ t.takim_sayisi }}/{{ t.max_takim }}</td>
+                <td class="sayi">{{ t.odul_havuzu|para }}</td>
+                <td>{{ durum_rozeti(t.durum) }}</td>
+                <td style="white-space:nowrap">
+                    <a class="btn btn-ikincil btn-kucuk" href="{{ url_for('turnuva_duzenle', turnuva_id=t.turnuva_id) }}">Düzenle</a>
+                    {{ sil_butonu(url_for('turnuva_sil', turnuva_id=t.turnuva_id), t.turnuva_adi ~ ' silinsin mi? Maçları ve kayıtları da silinir.') }}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="9" class="bos">Turnuva bulunamadı.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}

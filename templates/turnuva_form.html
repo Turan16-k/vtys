@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block baslik %}{{ 'Yeni Turnuva' if yeni else 'Turnuva Düzenle' }}{% endblock %}
+{% block icerik %}
+<h1>{{ 'Yeni Turnuva Oluştur' if yeni else 'Turnuva Bilgilerini Güncelle' }}</h1>
+<p class="alt-baslik">
+    {% if yeni %}Kayıt <code>turnuva_olustur()</code> fonksiyonu ile turnuva türüne göre ilgili alt tabloya da eklenir.
+    {% else %}Turnuva türü sonradan değiştirilemez.{% endif %}
+</p>
+
+{% set tur = deger.get('turnuva_turu', 'O') %}
+<form class="panel" method="post">
+    <div class="form-izgara">
+        <fieldset class="tam">
+            <legend>Genel Bilgiler (turnuva)</legend>
+            <div class="form-izgara">
+                <div class="tam"><label>Turnuva Adı</label><input name="turnuva_adi" required maxlength="80" value="{{ deger.get('turnuva_adi', '') }}"></div>
+                {% if yeni %}
+                <div>
+                    <label>Oyun</label>
+                    <select name="oyun_id" required>
+                        {% for o in oyunlar %}
+                            <option value="{{ o.oyun_id }}" {{ 'selected' if deger.get('oyun_id')|string == o.oyun_id|string }}>{{ o.oyun_adi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Turnuva Türü</label>
+                    <select name="turnuva_turu" id="tur" onchange="turDegisti()">
+                        <option value="O" {{ 'selected' if tur == 'O' }}>Online</option>
+                        <option value="S" {{ 'selected' if tur == 'S' }}>Salon</option>
+                    </select>
+                </div>
+                {% else %}
+                <div><label>Oyun</label><input value="{{ deger.oyun_adi }}" disabled></div>
+                <div><label>Turnuva Türü</label><input value="{{ 'Online' if tur == 'O' else 'Salon' }}" disabled></div>
+                {% endif %}
+                <div><label>Başlangıç Tarihi</label><input name="baslangic_tarihi" type="date" required value="{{ deger.get('baslangic_tarihi', '') }}"></div>
+                <div><label>Bitiş Tarihi</label><input name="bitis_tarihi" type="date" required value="{{ deger.get('bitis_tarihi', '') }}"></div>
+                <div><label>Ödül Havuzu (₺)</label><input name="odul_havuzu" type="number" min="0" step="0.01" value="{{ deger.get('odul_havuzu', 0) }}"></div>
+                <div><label>En Fazla Takım</label><input name="max_takim" type="number" min="2" max="64" required value="{{ deger.get('max_takim', 8) }}"></div>
+            </div>
+        </fieldset>
+
+        <fieldset class="tam" id="online-alanlar">
+            <legend>Online Turnuva Bilgileri (online_turnuva)</legend>
+            <div class="form-izgara">
+                <div><label>Yayın Platformu</label><input name="yayin_platformu" maxlength="30" placeholder="Twitch, YouTube, Kick..." value="{{ deger.get('yayin_platformu') or '' }}"></div>
+                <div><label>Sunucu Bölgesi</label><input name="sunucu_bolgesi" maxlength="30" placeholder="Avrupa (İstanbul)" value="{{ deger.get('sunucu_bolgesi') or '' }}"></div>
+            </div>
+        </fieldset>
+
+        <fieldset class="tam" id="salon-alanlar">
+            <legend>Salon Turnuvası Bilgileri (salon_turnuva)</legend>
+            <div class="form-izgara">
+                <div>
+                    <label>Mekan</label>
+                    <select name="mekan_id">
+                        {% for m in mekanlar %}
+                            <option value="{{ m.mekan_id }}" {{ 'selected' if deger.get('mekan_id')|string == m.mekan_id|string }}>{{ m.mekan_adi }} – {{ m.sehir }} ({{ m.kapasite }} kişi)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div><label>Bilet Fiyatı (₺)</label><input name="bilet_fiyati" type="number" min="0" step="0.01" value="{{ deger.get('bilet_fiyati') or 0 }}"></div>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="form-alt">
+        <button class="btn" type="submit">{{ 'Oluştur' if yeni else 'Güncelle' }}</button>
+        <a class="btn btn-ikincil" href="{{ url_for('turnuvalar') if yeni else url_for('turnuva_detay', turnuva_id=turnuva_id) }}">Vazgeç</a>
+    </div>
+</form>
+
+<script>
+    function turDegisti() {
+        var secim = document.getElementById('tur');
+        var tur = secim ? secim.value : {{ tur|tojson }};
+        document.getElementById('online-alanlar').style.display = tur === 'O' ? '' : 'none';
+        document.getElementById('salon-alanlar').style.display = tur === 'S' ? '' : 'none';
+    }
+    turDegisti();
+</script>
+{% endblock %}

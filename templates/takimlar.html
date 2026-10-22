@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import sil_butonu %}
+{% block baslik %}Takımlar{% endblock %}
+{% block icerik %}
+<div class="baslik-satiri">
+    <div>
+        <h1>Takımlar</h1>
+        <p class="alt-baslik">Takımları arayın, ekleyin, düzenleyin veya silin.</p>
+    </div>
+    <a class="btn" href="{{ url_for('takim_ekle') }}">+ Yeni Takım</a>
+</div>
+
+<section class="panel">
+    <form class="arama" method="get">
+        <input type="text" name="q" value="{{ aranan }}" placeholder="Takım adı veya kısa ad ile ara...">
+        <select name="oyun_id" style="max-width:240px">
+            <option value="">Tüm oyunlar</option>
+            {% for o in oyunlar %}
+                <option value="{{ o.oyun_id }}" {{ 'selected' if secili_oyun == o.oyun_id|string }}>{{ o.oyun_adi }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn" type="submit">Ara</button>
+        {% if aranan or secili_oyun %}<a class="btn btn-ikincil" href="{{ url_for('takimlar') }}">Temizle</a>{% endif %}
+    </form>
+
+    <div class="tablo-kap">
+    <table>
+        <thead><tr><th>Takım</th><th>Kısa Ad</th><th>Oyun</th><th>Ülke</th><th>Koç</th>
+            <th class="sayi">Aktif Oyuncu</th><th class="sayi">Ödül</th><th></th></tr></thead>
+        <tbody>
+        {% for t in kayitlar %}
+            <tr>
+                <td><a href="{{ url_for('takim_detay', takim_id=t.takim_id) }}"><strong>{{ t.takim_adi }}</strong></a></td>
+                <td><span class="rozet mor">{{ t.kisa_ad }}</span></td>
+                <td>{{ t.oyun_adi }}</td>
+                <td>{{ t.ulke_adi }}</td>
+                <td>{{ t.koc or '-' }}</td>
+                <td class="sayi">{{ t.oyuncu_sayisi }}</td>
+                <td class="sayi">{{ t.odul_sayisi }}</td>
+                <td style="white-space:nowrap">
+                    <a class="btn btn-ikincil btn-kucuk" href="{{ url_for('takim_duzenle', takim_id=t.takim_id) }}">Düzenle</a>
+                    {{ sil_butonu(url_for('takim_sil', takim_id=t.takim_id), t.takim_adi ~ ' silinsin mi?') }}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8" class="bos">Takım bulunamadı.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}

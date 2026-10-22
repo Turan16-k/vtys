@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% from "_makrolar.html" import sil_butonu, durum_rozeti, tur_rozeti %}
+{% block baslik %}{{ turnuva.turnuva_adi }}{% endblock %}
+{% block icerik %}
+<div class="baslik-satiri">
+    <div>
+        <h1>{{ turnuva.turnuva_adi }}</h1>
+        <p class="alt-baslik">{{ turnuva.oyun_adi }} · {{ tur_rozeti(turnuva.turnuva_turu) }} · {{ durum_rozeti(turnuva.durum) }}</p>
+    </div>
+    <div>
+        <a class="btn btn-ikincil" href="{{ url_for('turnuva_duzenle', turnuva_id=turnuva.turnuva_id) }}">Düzenle</a>
+        {{ sil_butonu(url_for('turnuva_sil', turnuva_id=turnuva.turnuva_id), turnuva.turnuva_adi ~ ' silinsin mi?', 'Turnuvayı Sil') }}
+    </div>
+</div>
+
+<div class="izgara izgara-2">
+    <section class="panel">
+        <h2>Turnuva Bilgileri</h2>
+        <dl class="bilgi-listesi">
+            <dt>Tarih</dt><dd>{{ turnuva.baslangic_tarihi|tarih }} – {{ turnuva.bitis_tarihi|tarih }}</dd>
+            <dt>Ödül Havuzu</dt><dd>{{ turnuva.odul_havuzu|para }}</dd>
+            <dt>Takımlar</dt><dd>{{ turnuva.takim_sayisi }} / {{ turnuva.max_takim }}</dd>
+            {% if turnuva.turnuva_turu == 'O' %}
+                <dt>Yayın Platformu</dt><dd>{{ turnuva.yayin_platformu }}</dd>
+                <dt>Sunucu Bölgesi</dt><dd>{{ turnuva.sunucu_bolgesi }}</dd>
+            {% else %}
+                <dt>Mekan</dt><dd>{{ turnuva.mekan_adi }}, {{ turnuva.sehir }} ({{ turnuva.kapasite }} kişi)</dd>
+                <dt>Bilet Fiyatı</dt><dd>{{ turnuva.bilet_fiyati|para }}</dd>
+            {% endif %}
+        </dl>
+
+        {% if turnuva.durum == 'Kayıt Açık' %}
+            <h2 style="margin-top:20px">Fikstür Oluştur</h2>
+            <p class="soluk"><code>fikstur_olustur()</code> fonksiyonu kayıtlı takımlar için lig usulü maçları oluşturur ve turnuvayı başlatır.</p>
+            <form class="kucuk-form" method="post" action="{{ url_for('fikstur', turnuva_id=turnuva.turnuva_id) }}">
+                <div><label>İlk Maç Zamanı</label><input type="datetime-local" name="ilk_mac" required value="{{ turnuva.baslangic_tarihi|html_tarih }}T18:00"></div>
+                <div>
+                    <label>Maç Aralığı</label>
+                    <select name="aralik">
+                        <option value="2 hours">2 saat</option>
+                        <option value="6 hours">6 saat</option>
+                        <option value="1 day" selected>1 gün</option>
+                    </select>
+                </div>
+                <button class="btn btn-basari" type="submit">Fikstürü Oluştur</button>
+            </form>
+        {% elif turnuva.durum == 'Devam Ediyor' %}
+            <h2 style="margin-top:20px">Turnuvayı Bitir</h2>
+            <p class="soluk">Tüm maçlar oynandıktan sonra turnuva tamamlanır; tetikleyici sıralamayı yazar ve ödülleri dağıtır.</p>
+            <form method="post" action="{{ url_for('turnuva_tamamla', turnuva_id=turnuva.turnuva_id) }}">
+                <button class="btn btn-basari" type="submit">Turnuvayı Tamamla</button>
+            </form>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Puan Tablosu</h2>
+        <p class="soluk"><code>puan_tablosu()</code> fonksiyonu ile hesaplanır.</p>
+        <table>
+            <thead><tr><th>#</th><th>Takım</th><th class="sayi">O</th><th class="sayi">G</th><th class="sayi">M</th><th class="sayi">Av.</th><th class="sayi">Puan</th><th></th></tr></thead>
+            <tbody>
+            {% for p in puan_tablosu %}
+                <tr>
+                    <td>{{ p.sira }}</td>
+                    <td><a href="{{ url_for('takim_detay', takim_id=p.takim_id) }}">{{ p.takim_adi }}</a></td>
+                    <td class="sayi">{{ p.oynanan }}</td>
+                    <td class="sayi">{{ p.galibiyet }}</td>
+                    <td class="sayi">{{ p.maglubiyet }}</td>
+                    <td class="sayi">{{ '%+d'|format(p.skor_farki) }}</td>
+                    <td class="sayi"><strong>{{ p.puan }}</strong></td>
+                    <td>
+                        {% if turnuva.durum == 'Kayıt Açık' %}
+                            {{ sil_butonu(url_for('katilim_sil', turnuva_id=turnuva.turnuva_id, takim_id=p.takim_id), p.takim_adi ~ ' turnuvadan çıkarılsın mı?', 'Çıkar') }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="8" class="bos">Henüz kayıtlı takım yok.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% if turnuva.durum == 'Kayıt Açık' %}
+            <h2 style="margin-top:20px">Takım Kaydet</h2>
+            <form class="kucuk-form" method="post" action="{{ url_for('katilim_ekle', turnuva_id=turnuva.turnuva_id) }}">
+                <div>
+                    <label>Takım</label>
+                    <select name="takim_id" required>
+                        {% for t in kayit_olabilir %}<option value="{{ t.takim_id }}">{{ t.takim_adi }}</option>{% endfor %}
+                    </select>
+                </div>
+                <button class="btn" type="submit">Kaydet</button>
+            </form>
+        {% endif %}
+    </section>
+</div>
+
+<section class="panel">
+    <h2>Maçlar</h2>
+    <div class="tablo-kap">
+    <table>
+        <thead><tr><th>Zaman</th><th>Aşama</th><th class="sayi">Takım 1</th><th style="text-align:center">Skor</th><th>Takım 2</th><th>Hakem</th><th>Durum</th><th></th></tr></thead>
+        <tbody>
+        {% for m in maclar %}
+            <tr>
+                <td style="white-space:nowrap">{{ m.mac_zamani|tarih }}</td>
+                <td>{{ m.asama_adi }}</td>
+                <td class="sayi {{ 'kazanan' if m.kazanan_id == m.takim1_id }}">{{ m.t1_adi }}</td>
+                <td style="text-align:center; white-space:nowrap">
+                    {% if m.durum == 'Oynandı' %}
+                        <strong>{{ m.takim1_skor }} - {{ m.takim2_skor }}</strong>
+                    {% elif m.durum == 'Planlandı' and turnuva.durum == 'Devam Ediyor' %}
+                        <form class="satir-ici" method="post" action="{{ url_for('mac_sonuc', mac_id=m.mac_id) }}">
+                            <input type="hidden" name="donus" value="{{ url_for('turnuva_detay', turnuva_id=turnuva.turnuva_id) }}">
+                            <input class="skor-input" type="number" name="skor1" min="0" max="99" required>
+                            <input class="skor-input" type="number" name="skor2" min="0" max="99" required>
+                            <button class="btn btn-kucuk" type="submit">Kaydet</button>
+                        </form>
+                    {% else %}-{% endif %}
+                </td>
+                <td class="{{ 'kazanan' if m.kazanan_id == m.takim2_id }}">{{ m.t2_adi }}</td>
+                <td>{{ m.hakem or '-' }}</td>
+                <td>{{ durum_rozeti(m.durum) }}</td>
+                <td><a class="btn btn-ikincil btn-kucuk" href="{{ url_for('mac_detay', mac_id=m.mac_id) }}">Detay</a></td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8" class="bos">Fikstür henüz oluşturulmadı.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Ödüller</h2>
+    <table>
+        <thead><tr><th>Derece</th><th class="sayi">Tutar</th><th>Kazanan Takım</th><th></th></tr></thead>
+        <tbody>
+        {% for o in oduller %}
+            <tr>
+                <td>{{ o.derece }}.</td>
+                <td class="sayi">{{ o.tutar|para }}</td>
+                <td>{{ o.takim_adi or '— turnuva bitince belirlenecek —' }}</td>
+                <td>{% if turnuva.durum != 'Tamamlandı' %}{{ sil_butonu(url_for('odul_sil', turnuva_id=turnuva.turnuva_id, odul_id=o.odul_id), 'Ödül silinsin mi?') }}{% endif %}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4" class="bos">Ödül tanımlanmamış.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if turnuva.durum != 'Tamamlandı' %}
+        <form class="kucuk-form" style="margin-top:14px" method="post" action="{{ url_for('odul_ekle', turnuva_id=turnuva.turnuva_id) }}">
+            <div><label>Derece</label><input type="number" name="derece" min="1" required value="{{ oduller|length + 1 }}"></div>
+            <div><label>Tutar (₺)</label><input type="number" name="tutar" min="1" step="0.01" required></div>
+            <button class="btn" type="submit">Ödül Ekle</button>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}

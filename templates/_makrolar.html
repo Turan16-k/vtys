@@ -1,0 +1,16 @@
+{% macro durum_rozeti(durum) -%}
+    {%- set renk = {'Kayıt Açık': 'mavi', 'Devam Ediyor': 'sari', 'Tamamlandı': 'yesil',
+                    'Planlandı': 'gri', 'Oynandı': 'yesil', 'İptal': 'gri'} -%}
+    <span class="rozet {{ renk.get(durum, '') }}">{{ durum }}</span>
+{%- endmacro %}
+
+{% macro tur_rozeti(tur) -%}
+    {%- if tur == 'O' -%}<span class="rozet mor">Online</span>
+    {%- else -%}<span class="rozet mavi">Salon</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro sil_butonu(adres, soru, yazi='Sil') -%}
+    <form class="satir-ici" method="post" action="{{ adres }}" onsubmit='return confirm({{ soru|tojson }});'>
+        <button class="btn btn-tehlike btn-kucuk" type="submit">{{ yazi }}</button>
+    </form>
+{%- endmacro %}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block baslik %}E-spor Turnuva{% endblock %} · E-spor Turnuva Yönetimi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="ust-menu">
+    <div class="kap">
+        <a class="logo" href="{{ url_for('ana_sayfa') }}">E-SPOR<span>ARENA</span></a>
+        <nav>
+            {% set uc = request.endpoint or '' %}
+            <a href="{{ url_for('ana_sayfa') }}" class="{{ 'aktif' if uc == 'ana_sayfa' }}">Ana Sayfa</a>
+            <a href="{{ url_for('oyuncular') }}" class="{{ 'aktif' if uc.startswith('oyuncu') }}">Oyuncular</a>
+            <a href="{{ url_for('takimlar') }}" class="{{ 'aktif' if uc.startswith('takim') or uc == 'kaptan_yap' }}">Takımlar</a>
+            <a href="{{ url_for('turnuvalar') }}" class="{{ 'aktif' if uc.startswith('turnuva') or uc.startswith('mac') }}">Turnuvalar</a>
+            <a href="{{ url_for('islem_gunlugu') }}" class="{{ 'aktif' if uc == 'islem_gunlugu' }}">İşlem Günlüğü</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    {% with mesajlar = get_flashed_messages(with_categories=true) %}
+        {% for tur, mesaj in mesajlar %}
+            <div class="bildirim {{ tur }}">{{ mesaj }}</div>
+        {% endfor %}
+    {% endwith %}
+    {% block icerik %}{% endblock %}
+</main>
+
+<footer>BSM 211 Veritabanı Yönetim Sistemleri · E-spor Turnuva Yönetim Sistemi · PostgreSQL + Flask</footer>
+</body>
+</html>
