@@ -1,4 +1,4 @@
-# E-spor Turnuva Yönetim Sistemi
+# Emlak& gayrimenkul Yönetim Sistemi
 
 BSM 211 Veritabanı Yönetim Sistemleri proje çalışması. PostgreSQL veritabanı (Database-First) ve
 Python / Flask web uygulaması.
